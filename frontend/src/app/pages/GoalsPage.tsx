@@ -124,7 +124,7 @@ export function GoalsStudioPage({ goals, accounts, onChanged, setError, setToast
   const participantCount = goals.reduce((count, goal) => count + goal.participants.length, 0);
 
   return (
-    <div className="grid gap-6">
+    <div className="goals-workspace grid gap-6">
       <section className={uiHeroClass}>
         <div className="grid gap-5">
           <div>
@@ -141,8 +141,8 @@ export function GoalsStudioPage({ goals, accounts, onChanged, setError, setToast
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-        <section className={uiPanelClass}>
+      <div className="goals-main-grid grid gap-6 xl:grid-cols-[minmax(360px,5fr)_minmax(0,7fr)]">
+        <section className={`${uiPanelClass} goals-form-surface`}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-[var(--text)]">{editingId ? 'Edit goal' : 'Create goal'}</h3>
             <span className="text-sm text-[var(--muted)]">Track a personal or shared target</span>
@@ -167,12 +167,12 @@ export function GoalsStudioPage({ goals, accounts, onChanged, setError, setToast
           </div>
         </section>
 
-        <section className={uiPanelClass}>
+        <section className={`${uiPanelClass} goals-board-surface`}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-[var(--text)]">Goal board</h3>
             <span className="text-sm text-[var(--muted)]">{goals.length} goal cards</span>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="goals-board-list grid gap-3 sm:grid-cols-2">
             {goals.map((goal) => {
               const progress = getGoalProgressPercent(goal.currentAmount, goal.targetAmount);
               return (
@@ -208,7 +208,12 @@ export function GoalsStudioPage({ goals, accounts, onChanged, setError, setToast
                 </article>
               );
             })}
-            {goals.length === 0 && <p className="text-sm text-[var(--muted)]">No goals yet. Create one to start tracking progress.</p>}
+            {goals.length === 0 && (
+              <article className="goals-empty-state rounded-2xl border border-dashed border-white/20 bg-white/[0.02] p-5 text-sm text-[var(--muted)] sm:col-span-2">
+                <h4 className="text-base font-semibold text-[var(--text)]">No goals yet</h4>
+                <p className="mt-2 leading-7">Create your first goal on the left to start tracking progress, shared contributions, and completion milestones.</p>
+              </article>
+            )}
           </div>
         </section>
       </div>

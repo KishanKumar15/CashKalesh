@@ -91,7 +91,7 @@ export function DashboardCommandCenter({ bundle, onNavigate }: { bundle: AppBund
   const dangerDates = useMemo(() => bundle.forecastDaily.filter((point) => point.projectedBalance <= FORECAST_DANGER_THRESHOLD), [bundle.forecastDaily]);
 
   return (
-    <div className="dashboard-sample-board grid gap-6 pb-24 xl:pb-6">
+    <div className="dashboard-sample-board dashboard-canvas grid gap-6 pb-24 xl:pb-6">
       <header className={`${uiPanelClass} dashboard-greeting-surface`}>
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Dashboard</p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text)] md:text-4xl">Welcome back</h2>
@@ -104,14 +104,14 @@ export function DashboardCommandCenter({ bundle, onNavigate }: { bundle: AppBund
           <h3 className="mt-3 text-4xl font-semibold tracking-tight text-white md:text-5xl">{formatCompactAmount(totalBalance)}</h3>
           <p className="mt-3 text-sm leading-7 text-white/70">{recommendation}</p>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className="dashboard-balance-metrics mt-5 grid gap-3 sm:grid-cols-2">
             <StatCard label="Expenses" value={bundle.dashboard.expense} tone="warning" />
             <StatCard label="Income" value={bundle.dashboard.income} tone="positive" />
             <StatCard label="Safe to spend" value={bundle.dashboard.forecast.safeToSpend} tone="neutral" />
             <StatCard label="Health score" value={bundle.dashboard.healthScore.score} tone="neutral" />
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-2.5">
+          <div className="dashboard-cta-row mt-5 flex flex-wrap gap-2.5">
             <button className="rounded-xl bg-gradient-to-r from-[#4f7dff] to-[#3d6dff] px-4 py-2.5 text-sm font-medium text-white transition hover:brightness-110" onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}>Quick Add</button>
             <button className="rounded-xl border border-white/15 bg-white/[0.03] px-4 py-2.5 text-sm text-white/90 transition hover:bg-white/[0.08]" onClick={() => onNavigate('transactions')}>Transactions</button>
             <button className="rounded-xl border border-white/15 bg-white/[0.03] px-4 py-2.5 text-sm text-white/90 transition hover:bg-white/[0.08]" onClick={() => onNavigate('budgets')}>Budgets</button>
@@ -147,8 +147,8 @@ export function DashboardCommandCenter({ bundle, onNavigate }: { bundle: AppBund
             <h3 className="text-lg font-semibold text-[var(--text)]">Expenses by Category</h3>
             <span className="text-xs text-[var(--muted)]">Current mix</span>
           </div>
-          <div className="grid gap-4 md:grid-cols-[1fr_220px]">
-            <div className="grid gap-3">
+          <div className="dashboard-category-grid grid gap-4 md:grid-cols-[1fr_220px]">
+            <div className="dashboard-category-list grid gap-3">
               {bundle.dashboard.spendingByCategory.slice(0, 6).map((item, index) => (
                 <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2.5" key={item.category}>
                   <div className="flex items-center gap-2.5">
@@ -235,7 +235,7 @@ export function DashboardCommandCenter({ bundle, onNavigate }: { bundle: AppBund
           </div>
         </article>
 
-        <div className="grid gap-6">
+        <div className="dashboard-side-stack grid gap-6">
           <article className={`${uiPanelClass} dashboard-recommendation-surface`}>
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-[var(--text)]">Top Recommendation</h3>
@@ -270,7 +270,7 @@ export function DashboardCommandCenter({ bundle, onNavigate }: { bundle: AppBund
             <h3 className="text-lg font-semibold text-[var(--text)]">Insight Stories</h3>
             <button className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-[var(--muted)] transition hover:bg-white/[0.06]" onClick={() => onNavigate('insights')}>View all</button>
           </div>
-          <div className="grid gap-3">
+          <div className="dashboard-insights-list grid gap-3">
             {bundle.dashboard.insights.slice(0, 4).map((item) => (
               <article className="rounded-2xl border border-white/10 bg-white/[0.02] p-4" key={item.title}>
                 <strong className="text-sm text-[var(--text)]">{item.title}</strong>

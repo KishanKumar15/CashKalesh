@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { api, type BudgetUpsertRequest } from '../../../services/api';
 import { getBudgetPeriodLabel, validateBudgetForm } from '../../viewModels';
 import {
@@ -263,7 +263,7 @@ export function BudgetsManagerPage({ accounts, categories, initialBudgets, onCha
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(360px,4fr)_minmax(0,8fr)]">
         <section className={uiPanelClass}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-[var(--text)]">{editingId ? 'Edit budget' : 'Create budget'}</h3>
@@ -338,3 +338,4 @@ export function BudgetsManagerPage({ accounts, categories, initialBudgets, onCha
     </div>
   );
 }
+

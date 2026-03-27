@@ -168,6 +168,12 @@ export function AccountsStudioPage({
   }
 
   const sharedAccounts = accounts.filter((account) => (accountMembers[account.id] ?? []).length > 1).length;
+  const accountTypeOptions = [
+    { value: 'Bank', label: 'Bank' },
+    { value: 'Savings', label: 'Savings' },
+    { value: 'CreditCard', label: 'Credit card' },
+  ] as const;
+  const hasLegacyAccountType = !accountTypeOptions.some((option) => option.value === accountForm.type);
 
   return (
     <div className="grid gap-6">
@@ -195,12 +201,12 @@ export function AccountsStudioPage({
         <section className={uiPanelClass}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-[var(--text)]">{editingAccountId ? 'Edit account' : 'Create account'}</h3>
-            <span className="text-sm text-[var(--muted)]">Bank, savings, card, or wallet</span>
+            <span className="text-sm text-[var(--muted)]">Bank, savings, or credit card</span>
           </div>
           <p className="mb-3 text-xs uppercase tracking-[0.14em] text-[var(--muted)]">Fields marked * are mandatory</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="grid gap-1.5 text-sm text-[var(--muted)]">Account name *<input className={accountFieldErrors.name ? `${uiInputClass} field-invalid` : uiInputClass} value={accountForm.name} onChange={(event) => { setAccountForm((current) => ({ ...current, name: event.target.value })); setAccountFieldErrors((current) => ({ ...current, name: undefined })); setAccountFormError(''); }} placeholder="Example: Salary Account" />{accountFieldErrors.name && <span className="field-error">{accountFieldErrors.name}</span>}</label>
-            <label className="grid gap-1.5 text-sm text-[var(--muted)]">Type *<select className={accountFieldErrors.type ? `${uiInputClass} field-invalid` : uiInputClass} value={accountForm.type} onChange={(event) => { setAccountForm((current) => ({ ...current, type: event.target.value })); setAccountFieldErrors((current) => ({ ...current, type: undefined })); setAccountFormError(''); }}><option value="Bank">Bank</option><option value="Savings">Savings</option><option value="CreditCard">Credit card</option><option value="CashWallet">Cash wallet</option></select>{accountFieldErrors.type && <span className="field-error">{accountFieldErrors.type}</span>}</label>
+            <label className="grid gap-1.5 text-sm text-[var(--muted)]">Type *<select className={accountFieldErrors.type ? `${uiInputClass} field-invalid` : uiInputClass} value={accountForm.type} onChange={(event) => { setAccountForm((current) => ({ ...current, type: event.target.value })); setAccountFieldErrors((current) => ({ ...current, type: undefined })); setAccountFormError(''); }}>{accountTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}{hasLegacyAccountType && <option value={accountForm.type}>Legacy type ({accountForm.type})</option>}</select>{accountFieldErrors.type && <span className="field-error">{accountFieldErrors.type}</span>}</label>
             <label className="grid gap-1.5 text-sm text-[var(--muted)]">Opening balance (INR) *<input className={accountFieldErrors.openingBalance ? `${uiInputClass} field-invalid` : uiInputClass} value={accountForm.openingBalance} onChange={(event) => { setAccountForm((current) => ({ ...current, openingBalance: event.target.value })); setAccountFieldErrors((current) => ({ ...current, openingBalance: undefined })); setAccountFormError(''); }} placeholder="0.00" />{accountFieldErrors.openingBalance && <span className="field-error">{accountFieldErrors.openingBalance}</span>}</label>
             <label className="grid gap-1.5 text-sm text-[var(--muted)]">Institution (optional)<input className={uiInputClass} value={accountForm.institutionName} onChange={(event) => setAccountForm((current) => ({ ...current, institutionName: event.target.value }))} placeholder="Example: HDFC Bank" /></label>
             <label className="grid gap-1.5 text-sm text-[var(--muted)]">Theme color (optional)<input className={uiInputClass} value={accountForm.color} onChange={(event) => setAccountForm((current) => ({ ...current, color: event.target.value }))} placeholder="#2563EB" /></label>

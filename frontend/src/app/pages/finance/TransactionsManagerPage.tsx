@@ -342,7 +342,7 @@ export function TransactionsManagerPage({ accounts, categories, transactions, in
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(360px,4fr)_minmax(0,8fr)]">
         <section className={uiPanelClass}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-[var(--text)]">{editingId ? 'Edit transaction' : 'Add transaction'}</h3>
@@ -448,12 +448,15 @@ export function TransactionsManagerPage({ accounts, categories, transactions, in
       {splitTarget && (
         <div className="split-modal-backdrop" onClick={() => { setSplitTarget(null); setSplitRows([]); }}>
           <section className="split-modal split-panel rounded-3xl border border-sky-300/30 bg-sky-500/5 p-5 md:p-6" role="dialog" aria-modal="true" aria-label={`Split ${splitTarget.merchant || splitTarget.type}`} onClick={(event) => event.stopPropagation()}>
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="split-modal-header mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-semibold text-[var(--text)]">Split {splitTarget.merchant || splitTarget.type}</h3>
                 <p className="mt-1 text-sm text-[var(--muted)]">Press Esc or click outside to close.</p>
               </div>
-              <span className="text-sm text-[var(--muted)]">{formatCurrency(splitTarget.amount)} total must be preserved</span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-sm text-[var(--muted)]">{formatCurrency(splitTarget.amount)} total must be preserved</span>
+                <button className={uiButtonClass('ghost')} onClick={() => { setSplitTarget(null); setSplitRows([]); }}>Close</button>
+              </div>
             </div>
 
             <div className="split-modal-content grid gap-3">
@@ -472,7 +475,7 @@ export function TransactionsManagerPage({ accounts, categories, transactions, in
               ))}
             </div>
 
-            <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="split-modal-footer mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-wrap gap-2">
                 <span className={uiChipClass}>Split total: {formatCurrency(splitRows.reduce((sum, row) => sum + Number(row.amount || 0), 0))}</span>
                 <span className={`${uiChipClass} border-sky-200/30 bg-sky-500/20`}>Original: {formatCurrency(splitTarget.amount)}</span>

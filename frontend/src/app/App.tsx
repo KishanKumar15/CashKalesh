@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { SESSION_EXPIRED_EVENT, api, type InsightCardDto, type TransactionDto, type UserProfileDto } from '../services/api';
 import { navItems } from './constants';
 import type { AppToast, Section } from './types';
@@ -32,6 +32,14 @@ type ProfileDetails = {
   headline: string;
   phone: string;
   city: string;
+};
+
+type SearchHit = {
+  id: string;
+  title: string;
+  subtitle: string;
+  signedAmount: string;
+  queryValue: string;
 };
 
 function readProfileDetails() {
@@ -134,8 +142,11 @@ export function App() {
   const [toast, setToastState] = useState<AppToast | null>(null);
   const [showPalette, setShowPalette] = useState(false);
   const [search, setSearch] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [highlightedSearchIndex, setHighlightedSearchIndex] = useState(-1);
   const [pendingRuleDraft, setPendingRuleDraft] = useState<RuleComposerState | null>(null);
-  const [profileLoadedFromApi, setProfileLoadedFromApi] = useState(false);
+  const mainContentRef = useRef<HTMLDivElement | null>(null);
+  const searchBoxRef = useRef<HTMLDivElement | null>(null);
 
   function setToast(message: string) {
     setToastState({ message });
@@ -185,6 +196,17 @@ export function App() {
     return () => window.clearTimeout(timeout);
   }, [toast]);
 
+  useEffect(() => {
+    const onPointerDown = (event: MouseEvent) => {
+      if (!searchBoxRef.current?.contains(event.target as Node)) {
+        setSearchFocused(false);
+        setHighlightedSearchIndex(-1);
+      }
+    };
+    window.addEventListener('mousedown', onPointerDown);
+    return () => window.removeEventListener('mousedown', onPointerDown);
+  }, []);
+
   const {
     section,
     setSection,
@@ -203,6 +225,11 @@ export function App() {
     handleAcceptInvitation,
     resetWorkspaceForLogout,
   } = useWorkspaceData({ token: localStorage.getItem('pft_access_token'), setLoading, setError, setToast });
+
+  useEffect(() => {
+    mainContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    setError('');
+  }, [section]);
 
   const {
     token,
@@ -240,11 +267,8 @@ export function App() {
         setProfileDetails(mapProfileDtoToDetails(profile));
         setProfileImageUrl(profile.profileImageUrl ?? null);
         localStorage.setItem('pft_user_name', profile.displayName);
-        setProfileLoadedFromApi(true);
       } catch {
-        if (!cancelled) {
-          setProfileLoadedFromApi(false);
-        }
+        // Keep local profile details if the profile endpoint is temporarily unavailable.
       }
     };
 
@@ -268,6 +292,52 @@ export function App() {
   }, [logoutSession]);
 
   const displayName = profileDetails.displayName.trim() || userName;
+  const normalizedSearch = search.trim().toLowerCase();
+  const searchHits = useMemo<SearchHit[]>(() => {
+    if (!bundle || normalizedSearch.length < 3) return [];
+    return bundle.transactions
+      .filter((transaction) => {
+        const searchable = [
+          transaction.merchant,
+          transaction.categoryName,
+          transaction.accountName,
+          transaction.type,
+          transaction.note,
+          ...transaction.tags,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return searchable.includes(normalizedSearch);
+      })
+      .slice(0, 7)
+      .map((transaction) => {
+        const dateLabel = new Date(transaction.transactionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+        const sign = transaction.type === 'Income' ? '+' : transaction.type === 'Expense' ? '-' : '';
+        const amount = `${sign}${transaction.amount.toLocaleString('en-IN')}`;
+        return {
+          id: transaction.id,
+          title: transaction.merchant || transaction.categoryName || transaction.type,
+          subtitle: `${transaction.accountName} | ${transaction.categoryName ?? 'Transfer'} | ${dateLabel}`,
+          signedAmount: amount,
+          queryValue: transaction.merchant || transaction.categoryName || transaction.accountName || search,
+        };
+      });
+  }, [bundle, normalizedSearch, search]);
+  const showSearchDropdown = searchFocused && normalizedSearch.length >= 3;
+
+  useEffect(() => {
+    if (!showSearchDropdown) {
+      setHighlightedSearchIndex(-1);
+      return;
+    }
+
+    setHighlightedSearchIndex((current) => {
+      if (searchHits.length === 0) return -1;
+      if (current < 0) return current;
+      return Math.min(current, searchHits.length - 1);
+    });
+  }, [searchHits, showSearchDropdown]);
 
   async function showQuickAddSavedToast(transaction: TransactionDto) {
     setToastState({
@@ -291,6 +361,14 @@ export function App() {
     setToast('Rule draft opened from insight.');
   }
 
+  function handleSearchResultSelect(hit: SearchHit) {
+    setSearch(hit.queryValue);
+    setSection('transactions');
+    setSearchFocused(false);
+    setHighlightedSearchIndex(-1);
+    setError('');
+  }
+
   async function saveProfile(nextDetails: ProfileDetails, nextImageUrl: string | null, successMessage: string) {
     setError('');
     try {
@@ -306,7 +384,6 @@ export function App() {
       setProfileImageUrl(updated.profileImageUrl ?? null);
       localStorage.setItem('pft_user_name', updated.displayName);
       setToast(successMessage);
-      setProfileLoadedFromApi(true);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'We could not save your profile right now. Please try again.');
     }
@@ -361,8 +438,9 @@ export function App() {
   const activeItem = navItems.find((item) => item.key === section);
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
+    <div className="app-frame">
+      <div className={showPalette ? 'app-shell modal-open' : 'app-shell'}>
+        <aside className="sidebar">
         <BrandMark />
         <div className="sidebar-scroll">
           <p className="sidebar-group-label">Main</p>
@@ -401,19 +479,99 @@ export function App() {
             <span>Logout</span>
           </button>
         </div>
-      </aside>
+        </aside>
 
-      <main className="main-panel min-w-0">
-        <header className="topbar">
+        <main className="main-panel min-w-0">
+          <header className="topbar">
           <div className="topbar-copy">
             <h1>{section === 'dashboard' ? `Hi, ${displayName.split(' ')[0] || displayName}!` : activeItem?.label ?? displayName}</h1>
             <span className="muted topbar-caption">{section === 'dashboard' ? 'A calmer view of balance, plans, and movement.' : activeItem?.shortLabel ?? 'Workspace'}</span>
           </div>
           <div className="topbar-actions">
-            <label className="topbar-search">
-              <span className="topbar-icon-button" aria-hidden="true"><AppIcon name="search" /></span>
-              <input className="search-input" placeholder="Search operations" value={search} onChange={(event) => setSearch(event.target.value)} />
-            </label>
+            <div className="topbar-search-shell" ref={searchBoxRef}>
+              <label className="topbar-search">
+                <span className="topbar-icon-button" aria-hidden="true"><AppIcon name="search" /></span>
+                <input
+                  className="search-input"
+                  placeholder="Search operations"
+                  value={search}
+                  aria-expanded={showSearchDropdown}
+                  aria-controls="topbar-search-results"
+                  onFocus={() => {
+                    setSearchFocused(true);
+                    setHighlightedSearchIndex(-1);
+                  }}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                    setHighlightedSearchIndex(-1);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape') {
+                      event.preventDefault();
+                      setSearchFocused(false);
+                      setHighlightedSearchIndex(-1);
+                      return;
+                    }
+
+                    if (event.key === 'ArrowDown' && showSearchDropdown) {
+                      event.preventDefault();
+                      if (searchHits.length > 0) {
+                        setHighlightedSearchIndex((current) => (current + 1 + searchHits.length) % searchHits.length);
+                      }
+                      return;
+                    }
+
+                    if (event.key === 'ArrowUp' && showSearchDropdown) {
+                      event.preventDefault();
+                      if (searchHits.length > 0) {
+                        setHighlightedSearchIndex((current) => {
+                          if (current < 0) return searchHits.length - 1;
+                          return (current - 1 + searchHits.length) % searchHits.length;
+                        });
+                      }
+                      return;
+                    }
+
+                    if (event.key === 'Enter' && search.trim().length >= 3) {
+                      event.preventDefault();
+                      const highlightedHit = highlightedSearchIndex >= 0 ? searchHits[highlightedSearchIndex] : null;
+                      if (highlightedHit) {
+                        handleSearchResultSelect(highlightedHit);
+                        return;
+                      }
+                      setSection('transactions');
+                      setSearchFocused(false);
+                      setHighlightedSearchIndex(-1);
+                    }
+                  }}
+                />
+              </label>
+              {showSearchDropdown && (
+                <div id="topbar-search-results" className="topbar-search-results" role="listbox" aria-label="Search results">
+                  {searchHits.length > 0 ? (
+                    searchHits.map((hit, index) => (
+                      <button
+                        key={hit.id}
+                        type="button"
+                        className={highlightedSearchIndex === index ? 'topbar-search-result is-active' : 'topbar-search-result'}
+                        aria-selected={highlightedSearchIndex === index}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onMouseEnter={() => setHighlightedSearchIndex(index)}
+                        onClick={() => handleSearchResultSelect(hit)}
+                      >
+                        <span className="topbar-search-result-copy">
+                          <strong>{hit.title}</strong>
+                          <span>{hit.subtitle}</span>
+                        </span>
+                        <span className="topbar-search-result-amount">{hit.signedAmount}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="topbar-search-empty">No operations found</p>
+                  )}
+                </div>
+              )}
+            </div>
             <button className="topbar-icon-button" onClick={() => setShowPalette(true)} aria-label="Open quick add"><AppIcon name="quick" /></button>
             <button className="topbar-icon-button" onClick={() => void refreshData()} aria-label="Refresh workspace"><AppIcon name="refresh" /></button>
             <button className="topbar-icon-button" onClick={() => setSection('notifications')} aria-label="Open alerts"><AppIcon name="notifications" /></button>
@@ -428,41 +586,46 @@ export function App() {
               <ProfileAvatar name={displayName} imageUrl={profileImageUrl} size="sm" />
               <div className="profile-chip-copy">
                 <strong>{displayName}</strong>
-                <span>{profileLoadedFromApi ? (userEmail || 'cashkalesh@local') : 'Loading profile...'}</span>
               </div>
             </button>
           </div>
-        </header>
+          </header>
 
-        <div className="main-content-scroll">
-          {error && <div className="error-banner">{error}</div>}
-          {loading && !bundle && <WorkspaceSkeleton />}
-
-          {bundle && (
-            <Suspense fallback={<SectionSkeleton section={section} />}>
-              <div className="workspace-section-stage">
-                {renderSection()}
+          <div className="main-content-scroll" ref={mainContentRef}>
+            {error && (
+              <div className="error-banner">
+                <span>{error}</span>
+                <button className="ghost-button error-banner-dismiss" onClick={() => setError('')}>Dismiss</button>
               </div>
-            </Suspense>
-          )}
-        </div>
-      </main>
+            )}
+            {loading && !bundle && <WorkspaceSkeleton />}
 
-      <MobileBottomNav section={section} onSelect={setSection} />
+            {bundle && (
+              <Suspense fallback={<SectionSkeleton section={section} />}>
+                <div className="workspace-section-stage">
+                  {renderSection()}
+                </div>
+              </Suspense>
+            )}
+          </div>
+        </main>
 
-      {showPalette && bundle && (
-        <QuickAddPalette
-          accounts={bundle.accounts}
-          categories={bundle.categories}
-          recentTransactions={bundle.transactions}
-          onClose={() => setShowPalette(false)}
-          onSaved={async (transaction) => {
-            setShowPalette(false);
-            await refreshData();
-            await showQuickAddSavedToast(transaction);
-          }}
-        />
-      )}
+        <MobileBottomNav section={section} onSelect={setSection} />
+
+        {showPalette && bundle && (
+          <QuickAddPalette
+            accounts={bundle.accounts}
+            categories={bundle.categories}
+            recentTransactions={bundle.transactions}
+            onClose={() => setShowPalette(false)}
+            onSaved={async (transaction) => {
+              setShowPalette(false);
+              await refreshData();
+              await showQuickAddSavedToast(transaction);
+            }}
+          />
+        )}
+      </div>
 
       {toast && <ToastBanner toast={toast} onDismiss={() => setToastState(null)} />}
     </div>

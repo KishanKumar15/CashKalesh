@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { AccountDto, CategoryDto, TransactionDto } from '../../services/api';
 import { api } from '../../services/api';
 import { validateQuickAddDraft } from '../viewModels';
@@ -54,8 +54,14 @@ export function QuickAddPalette({
   const [draft, setDraft] = useState<QuickAddDraft | null>(null);
   const [error, setError] = useState('');
   const [chipDraft, setChipDraft] = useState('');
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const suggestions = useMemo(() => getSuggestedPrompts(recentTransactions), [recentTransactions]);
   const previewCategoryOptions = useMemo(() => categories.filter((item) => !item.isArchived && item.type === (draft?.type === 'Income' ? 'Income' : 'Expense')), [categories, draft?.type]);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    inputRef.current?.setSelectionRange(inputRef.current.value.length, inputRef.current.value.length);
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -134,7 +140,7 @@ export function QuickAddPalette({
             <button className="ghost-button quick-add-close-inline" onClick={onClose} aria-label="Close quick add">Close</button>
           </div>
         </div>
-        <textarea rows={4} value={input} onChange={(event) => setInput(event.target.value)} placeholder="500 groceries yesterday from HDFC" />
+        <textarea ref={inputRef} rows={4} value={input} onChange={(event) => setInput(event.target.value)} placeholder="500 groceries yesterday from HDFC" />
         <div className="pill-list">
           {suggestions.map((suggestion) => (
             <button className="pill quick-add-suggestion" key={suggestion} onClick={() => setInput(suggestion)}>{suggestion}</button>
