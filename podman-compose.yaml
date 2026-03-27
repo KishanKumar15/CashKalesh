@@ -1,0 +1,55 @@
+services:
+  cashkalesh-db:
+    image: docker.io/library/postgres:16-alpine
+    container_name: cashkalesh-db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+    ports:
+      - "5432:5432"
+    volumes:
+      - cashkalesh-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cashkalesh-api:
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    container_name: cashkalesh-api
+    env_file:
+      - backend/.env
+    environment:
+      POSTGRES_HOST: cashkalesh-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+      POSTGRES_SSL: Prefer
+      ConnectionStrings__DefaultConnection: Host=cashkalesh-db;Port=5432;Database=postgres;Username=postgres;Password=1234;SSL Mode=Prefer
+      ASPNETCORE_URLS: http://+:5080
+    ports:
+      - "5080:5080"
+    depends_on:
+      cashkalesh-db:
+        condition: service_healthy
+
+  cashkalesh-web:
+    build:
+      context: ./frontend
+      dockerfile: Containerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:5080
+    container_name: cashkalesh-web
+    ports:
+      - "5173:80"
+    depends_on:
+      - cashkalesh-api
+
+volumes:
+  cashkalesh-pgdata:
+

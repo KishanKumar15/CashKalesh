@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY src/PersonalFinanceTracker.Api/PersonalFinanceTracker.Api.csproj src/PersonalFinanceTracker.Api/
+RUN dotnet restore src/PersonalFinanceTracker.Api/PersonalFinanceTracker.Api.csproj
+
+COPY . .
+WORKDIR /src/src/PersonalFinanceTracker.Api
+RUN dotnet publish PersonalFinanceTracker.Api.csproj -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+ENV ASPNETCORE_URLS=http://+:5080
+EXPOSE 5080
+ENTRYPOINT ["dotnet", "PersonalFinanceTracker.Api.dll"]
