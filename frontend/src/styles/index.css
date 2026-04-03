@@ -5108,3 +5108,162 @@ button:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
+/* Responsive safety rails (global) */
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.app-frame {
+  width: 100%;
+  min-height: 100dvh;
+  height: auto;
+  padding: clamp(0px, 1.1vw, 16px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: calc(100dvh - clamp(0px, 2.2vw, 32px));
+  height: auto;
+  grid-template-columns: minmax(220px, 18vw) minmax(0, 1fr);
+}
+
+.main-panel {
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(0.75rem, 1.2vw, 1rem);
+}
+
+.main-content-scroll {
+  min-height: 0;
+  padding: clamp(0.75rem, 1vw, 1.25rem) clamp(0.75rem, 1.1vw, 1.35rem) 6.2rem;
+}
+
+.topbar {
+  width: 100%;
+}
+
+.topbar-actions {
+  width: 100%;
+  justify-content: flex-end;
+  row-gap: 0.5rem;
+}
+
+.topbar-search-shell {
+  min-width: min(420px, 100%);
+  width: min(520px, 100%);
+}
+
+.search-input {
+  min-width: 0;
+}
+
+.page-grid,
+.metric-grid,
+.card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+}
+
+.two-column-grid,
+.dashboard-core-grid,
+.dashboard-forecast-grid,
+.dashboard-support-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.auth-page-v4 {
+  width: 100%;
+  min-height: 100dvh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.auth-shell-v4 {
+  width: min(100%, 1280px);
+  max-width: 1280px;
+  min-height: clamp(640px, 86dvh, 860px);
+  height: auto;
+}
+
+.auth-shell-v4__form .auth-form-v4 {
+  width: 100%;
+  max-width: none;
+}
+
+.auth-hero-v4__copy h2 {
+  font-size: clamp(1.65rem, 1.8vw + 1rem, 3rem);
+}
+
+@media (min-width: 901px) and (max-width: 1023px) {
+  .auth-shell-v4 {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .auth-shell-v4__visual {
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px;
+  }
+
+  .auth-shell-v4__form {
+    padding: 1.1rem;
+  }
+
+  .auth-hero-v4 {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 1200px) {
+  .app-frame {
+    padding: 0;
+  }
+
+  .app-shell {
+    min-height: 100dvh;
+    border-radius: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .two-column-grid,
+  .dashboard-core-grid,
+  .dashboard-forecast-grid,
+  .dashboard-support-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .auth-shell-v4 {
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    border-radius: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .auth-shell-v4__visual {
+    border-right: 0;
+  }
+
+  .auth-shell-v4__form {
+    padding: 1rem;
+  }
+}
