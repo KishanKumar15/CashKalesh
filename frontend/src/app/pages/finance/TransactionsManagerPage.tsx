@@ -301,15 +301,15 @@ export function TransactionsManagerPage({ accounts, categories, transactions, in
       <section className={uiHeroClass}>
         <div className="grid gap-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-white/65">Transactions Studio</p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white md:text-4xl">Capture, review, and correct money movement in one flow.</h2>
-            <p className="mt-2 max-w-3xl text-sm leading-7 text-white/75">Filters, transfers, split flows, and tags all stay in one workspace so review feels fast instead of tedious.</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Transactions Studio</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text)] md:text-4xl">Capture, review, and correct money movement in one flow.</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--muted)]">Filters, transfers, split flows, and tags all stay in one workspace so review feels fast instead of tedious.</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-emerald-300/20 bg-emerald-500/10 p-4"><span className="text-xs uppercase tracking-[0.16em] text-white/60">Income in view</span><strong className="mt-2 block text-2xl text-emerald-100">{formatCurrency(incomeTotal)}</strong></div>
-            <div className="rounded-2xl border border-orange-300/20 bg-orange-500/10 p-4"><span className="text-xs uppercase tracking-[0.16em] text-white/60">Expense in view</span><strong className="mt-2 block text-2xl text-orange-100">{formatCurrency(expenseTotal)}</strong></div>
-            <div className="rounded-2xl border border-sky-300/20 bg-sky-500/10 p-4"><span className="text-xs uppercase tracking-[0.16em] text-white/60">Transfers</span><strong className="mt-2 block text-2xl text-sky-100">{transferCount}</strong></div>
-            <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-4"><span className="text-xs uppercase tracking-[0.16em] text-white/60">Latest activity</span><strong className="mt-2 block text-2xl text-white">{latestTransaction ? format(new Date(latestTransaction.transactionDate), 'dd MMM') : 'No data'}</strong></div>
+            <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4"><span className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Income in view</span><strong className="mt-2 block text-2xl text-[var(--positive)]">{formatCurrency(incomeTotal)}</strong></div>
+            <div className="rounded-2xl border border-orange-400/30 bg-orange-500/10 p-4"><span className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Expense in view</span><strong className="mt-2 block text-2xl text-[var(--warning)]">{formatCurrency(expenseTotal)}</strong></div>
+            <div className="rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4"><span className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Transfers</span><strong className="mt-2 block text-2xl text-[var(--neutral)]">{transferCount}</strong></div>
+            <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--card-soft)] p-4"><span className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Latest activity</span><strong className="mt-2 block text-2xl text-[var(--text)]">{latestTransaction ? format(new Date(latestTransaction.transactionDate), 'dd MMM') : 'No data'}</strong></div>
           </div>
         </div>
       </section>
@@ -402,7 +402,7 @@ export function TransactionsManagerPage({ accounts, categories, transactions, in
                   {group.items.map((transaction) => (
                     <article
                       key={transaction.id}
-                      className={`transaction-entity rounded-2xl border border-white/10 bg-[#0f1930]/85 p-4 transition ${swipedId === transaction.id ? 'swipe-open' : ''} ${highlightIds.includes(transaction.id) ? 'transaction-animate-in' : ''} ${removingId === transaction.id ? 'transaction-removing' : ''}`}
+                      className={`transaction-entity workspace-entity-card rounded-2xl p-4 transition ${swipedId === transaction.id ? 'swipe-open' : ''} ${highlightIds.includes(transaction.id) ? 'transaction-animate-in' : ''} ${removingId === transaction.id ? 'transaction-removing' : ''}`}
                       onTouchStart={(event) => setTouchStartX(event.changedTouches[0]?.clientX ?? 0)}
                       onTouchEnd={(event) => {
                         const delta = touchStartX - (event.changedTouches[0]?.clientX ?? 0);

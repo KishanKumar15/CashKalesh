@@ -5524,3 +5524,32 @@ body {
     padding-bottom: calc(6.7rem + env(safe-area-inset-bottom));
   }
 }
+
+/* Light mode contrast correction */
+:root[data-theme='light'] .sidebar-group-label {
+  color: #6b6789;
+}
+
+:root[data-theme='light'] .sidebar .nav-item {
+  color: #332f52;
+}
+
+:root[data-theme='light'] .sidebar .nav-item:hover {
+  border-color: rgba(110, 92, 193, 0.28);
+  background: rgba(126, 108, 207, 0.16);
+}
+
+:root[data-theme='light'] .sidebar .nav-item.active {
+  border-color: rgba(102, 83, 199, 0.54);
+  color: #ffffff;
+}
+
+:root[data-theme='light'] .workspace-hero {
+  border-color: rgba(109, 91, 180, 0.24);
+  background: linear-gradient(135deg, rgba(149, 131, 236, 0.2), rgba(214, 207, 247, 0.56), rgba(235, 231, 252, 0.74));
+}
+
+:root[data-theme='light'] .workspace-hero p,
+:root[data-theme='light'] .workspace-hero span {
+  color: inherit;
+}
