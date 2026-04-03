@@ -2469,7 +2469,8 @@ body {
 /* Auth redesign v4 */
 .auth-page-v4 {
   position: relative;
-  height: 100svh;
+  min-height: 100svh;
+  height: auto;
   display: grid;
   place-items: center;
   padding: clamp(0.75rem, 2vh, 2rem) clamp(0.75rem, 1.8vw, 2rem);
@@ -2477,7 +2478,8 @@ body {
     radial-gradient(circle at 16% 18%, rgba(139, 118, 199, 0.18), transparent 34%),
     radial-gradient(circle at 82% 84%, rgba(116, 102, 173, 0.12), transparent 30%),
     linear-gradient(180deg, #938ca0 0%, #8a8498 100%);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .auth-page-v4__glow {
@@ -2505,7 +2507,8 @@ body {
   position: relative;
   z-index: 1;
   width: min(100%, 1240px);
-  height: min(720px, calc(100svh - clamp(1.5rem, 4vh, 4rem)));
+  min-height: clamp(620px, 86svh, 720px);
+  height: auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   border-radius: 32px;
@@ -2779,32 +2782,26 @@ body {
 .auth-form-v4__stage {
   min-height: 0;
   height: 100%;
+  overflow: hidden;
 }
 
 .auth-stage-shell-v4 {
   position: relative;
-  min-height: clamp(280px, 39vh, 390px);
+  min-height: 0;
   height: 100%;
+  overflow: hidden;
 }
 
 .auth-stage-panel-v4 {
+  display: none;
   position: absolute;
   inset: 0;
-  display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   gap: 1.25rem;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateY(10px);
-  transition: opacity 220ms ease, transform 220ms ease, visibility 220ms linear;
 }
 
 .auth-stage-panel-v4.is-active {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateY(0);
+  display: grid;
 }
 
 .auth-panel-fields-v4 {
@@ -2993,7 +2990,7 @@ body {
 
   .auth-shell-v4 {
     width: min(100%, 1180px);
-    height: min(700px, calc(100svh - 3rem));
+    min-height: clamp(600px, 84svh, 700px);
   }
 
   .auth-hero-v4__copy h2 {
@@ -3011,7 +3008,8 @@ body {
   }
 
   .auth-shell-v4 {
-    height: min(920px, calc(100svh - 2rem));
+    min-height: 0;
+    height: auto;
     grid-template-columns: 1fr;
   }
 
@@ -3048,7 +3046,8 @@ body {
   }
 
   .auth-shell-v4 {
-    height: calc(100svh - 1.5rem);
+    min-height: 0;
+    height: auto;
     border-radius: 24px;
   }
 
@@ -3094,7 +3093,7 @@ body {
   .auth-form-v4 {
     width: 100%;
     min-height: 0;
-    grid-template-rows: auto minmax(396px, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     gap: 1.2rem;
   }
 
@@ -3108,7 +3107,7 @@ body {
 
   .auth-stage-shell-v4,
   .auth-form-v4__stage {
-    min-height: 396px;
+    min-height: 0;
   }
 }
 
@@ -3122,7 +3121,8 @@ body {
 
   .auth-shell-v4 {
     width: 100%;
-    height: 100svh;
+    min-height: 100svh;
+    height: auto;
     border-radius: 0;
   }
 
@@ -3164,7 +3164,7 @@ body {
 
   .auth-form-v4 {
     gap: 1rem;
-    grid-template-rows: auto minmax(404px, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
   }
 
   .auth-form-v4__header {
@@ -3182,7 +3182,7 @@ body {
 
   .auth-stage-shell-v4,
   .auth-form-v4__stage {
-    min-height: 404px;
+    min-height: 0;
   }
 
   .auth-panel-meta-v4 {
