@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PersonalFinanceTracker.Api.Contracts;
 using PersonalFinanceTracker.Api.Domain.Entities;
+using PersonalFinanceTracker.Api.Domain.Enums;
 using PersonalFinanceTracker.Api.Persistence;
 
 namespace PersonalFinanceTracker.Api.Services;
@@ -92,6 +93,7 @@ public sealed class AuthService(
 
         dbContext.Users.Add(user);
         dbContext.UserPreferences.Add(new UserPreference { User = user, CurrencyCode = _branding.DefaultCurrency, Locale = _branding.DefaultLocale });
+        SeedStarterWorkspace(user);
         await dbContext.SaveChangesAsync(cancellationToken);
         await auditService.LogAsync(user.Id, "user", user.Id, "registered", new { user.Email }, cancellationToken);
 
@@ -122,6 +124,7 @@ public sealed class AuthService(
             return null;
         }
 
+        await EnsureStarterWorkspaceAsync(user, cancellationToken);
         await auditService.LogAsync(user.Id, "user", user.Id, "logged_in", null, cancellationToken);
         return await IssueTokensAsync(user, cancellationToken);
     }
@@ -147,6 +150,7 @@ public sealed class AuthService(
 
             dbContext.Users.Add(user);
             dbContext.UserPreferences.Add(new UserPreference { User = user, CurrencyCode = _branding.DefaultCurrency, Locale = _branding.DefaultLocale });
+            SeedStarterWorkspace(user);
             await dbContext.SaveChangesAsync(cancellationToken);
             await auditService.LogAsync(user.Id, "user", user.Id, "registered_google", new { user.Email, profile.Subject }, cancellationToken);
         }
@@ -158,6 +162,7 @@ public sealed class AuthService(
                 await dbContext.SaveChangesAsync(cancellationToken);
             }
 
+            await EnsureStarterWorkspaceAsync(user, cancellationToken);
             await auditService.LogAsync(user.Id, "user", user.Id, "logged_in_google", new { profile.Subject }, cancellationToken);
         }
 
@@ -297,5 +302,97 @@ public sealed class AuthService(
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(value));
         return Convert.ToHexString(bytes);
+    }
+
+    private void SeedStarterWorkspace(User user)
+    {
+        if (dbContext.Accounts.Any(x => x.UserId == user.Id))
+        {
+            return;
+        }
+
+        dbContext.Accounts.AddRange(
+            new Account
+            {
+                User = user,
+                Name = "Salary Account",
+                Type = AccountType.Bank,
+                OpeningBalance = 0,
+                CurrentBalance = 0,
+                Color = "#2563EB",
+                Icon = "landmark",
+                InstitutionName = "Primary Bank"
+            },
+            new Account
+            {
+                User = user,
+                Name = "Travel Card",
+                Type = AccountType.CreditCard,
+                OpeningBalance = 0,
+                CurrentBalance = 0,
+                Color = "#F59E0B",
+                Icon = "credit-card",
+                InstitutionName = "Card Provider"
+            });
+
+        dbContext.Categories.AddRange(
+            new Category { User = user, Name = "Food", Type = CategoryType.Expense, Color = "#F97316", Icon = "utensils" },
+            new Category { User = user, Name = "Rent", Type = CategoryType.Expense, Color = "#EF4444", Icon = "house" },
+            new Category { User = user, Name = "Transport", Type = CategoryType.Expense, Color = "#8B5CF6", Icon = "car" },
+            new Category { User = user, Name = "Subscriptions", Type = CategoryType.Expense, Color = "#0EA5E9", Icon = "receipt" },
+            new Category { User = user, Name = "Utilities", Type = CategoryType.Expense, Color = "#14B8A6", Icon = "bolt" },
+            new Category { User = user, Name = "Salary", Type = CategoryType.Income, Color = "#22C55E", Icon = "briefcase" },
+            new Category { User = user, Name = "Freelance", Type = CategoryType.Income, Color = "#06B6D4", Icon = "sparkles" });
+    }
+
+    private async Task EnsureStarterWorkspaceAsync(User user, CancellationToken cancellationToken)
+    {
+        var hasAccounts = await dbContext.Accounts.AnyAsync(x => x.UserId == user.Id, cancellationToken);
+        var hasCategories = await dbContext.Categories.AnyAsync(x => x.UserId == user.Id, cancellationToken);
+        if (hasAccounts && hasCategories)
+        {
+            return;
+        }
+
+        if (!hasAccounts)
+        {
+            dbContext.Accounts.AddRange(
+                new Account
+                {
+                    UserId = user.Id,
+                    Name = "Salary Account",
+                    Type = AccountType.Bank,
+                    OpeningBalance = 0,
+                    CurrentBalance = 0,
+                    Color = "#2563EB",
+                    Icon = "landmark",
+                    InstitutionName = "Primary Bank"
+                },
+                new Account
+                {
+                    UserId = user.Id,
+                    Name = "Travel Card",
+                    Type = AccountType.CreditCard,
+                    OpeningBalance = 0,
+                    CurrentBalance = 0,
+                    Color = "#F59E0B",
+                    Icon = "credit-card",
+                    InstitutionName = "Card Provider"
+                });
+        }
+
+        if (!hasCategories)
+        {
+            dbContext.Categories.AddRange(
+                new Category { UserId = user.Id, Name = "Food", Type = CategoryType.Expense, Color = "#F97316", Icon = "utensils" },
+                new Category { UserId = user.Id, Name = "Rent", Type = CategoryType.Expense, Color = "#EF4444", Icon = "house" },
+                new Category { UserId = user.Id, Name = "Transport", Type = CategoryType.Expense, Color = "#8B5CF6", Icon = "car" },
+                new Category { UserId = user.Id, Name = "Subscriptions", Type = CategoryType.Expense, Color = "#0EA5E9", Icon = "receipt" },
+                new Category { UserId = user.Id, Name = "Utilities", Type = CategoryType.Expense, Color = "#14B8A6", Icon = "bolt" },
+                new Category { UserId = user.Id, Name = "Salary", Type = CategoryType.Income, Color = "#22C55E", Icon = "briefcase" },
+                new Category { UserId = user.Id, Name = "Freelance", Type = CategoryType.Income, Color = "#06B6D4", Icon = "sparkles" });
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

@@ -75,6 +75,12 @@ export function QuickAddPalette({
   }, [onClose]);
 
   async function parse() {
+    if (accounts.length === 0) {
+      setDraft(null);
+      setError('Create at least one account in the Accounts page before using Quick Add.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
@@ -161,9 +167,23 @@ export function QuickAddPalette({
                   <label>Type<select value={draft.type} onChange={(event) => setDraft((current) => current ? { ...current, type: event.target.value, categoryId: '' } : current)}><option>Expense</option><option>Income</option><option>Transfer</option></select></label>
                   <label>Merchant<input value={draft.merchant} onChange={(event) => setDraft((current) => current ? { ...current, merchant: event.target.value } : current)} /></label>
                   <label>Date<input type="date" value={draft.transactionDate.slice(0, 10)} onChange={(event) => setDraft((current) => current ? { ...current, transactionDate: event.target.value } : current)} /></label>
-                  <label>Account<select value={draft.accountId} onChange={(event) => setDraft((current) => current ? { ...current, accountId: event.target.value } : current)}>{accounts.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+                  <label>
+                    Account
+                    <select value={draft.accountId} onChange={(event) => setDraft((current) => current ? { ...current, accountId: event.target.value } : current)}>
+                      {accounts.length === 0
+                        ? <option value="">No accounts available</option>
+                        : accounts.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                    </select>
+                  </label>
                   {draft.type !== 'Transfer' && (
-                    <label>Category<select value={draft.categoryId} onChange={(event) => setDraft((current) => current ? { ...current, categoryId: event.target.value } : current)}>{previewCategoryOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+                    <label>
+                      Category
+                      <select value={draft.categoryId} onChange={(event) => setDraft((current) => current ? { ...current, categoryId: event.target.value } : current)}>
+                        {previewCategoryOptions.length === 0
+                          ? <option value="">No categories available</option>
+                          : previewCategoryOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                      </select>
+                    </label>
                   )}
                   <label className="full-width-field">Payment method<input value={draft.paymentMethod} onChange={(event) => setDraft((current) => current ? { ...current, paymentMethod: event.target.value } : current)} /></label>
                   <label className="full-width-field">Note<input value={draft.note} onChange={(event) => setDraft((current) => current ? { ...current, note: event.target.value } : current)} /></label>
