@@ -54,11 +54,11 @@ export function AuthShell({
   const currentSlide = authShellSlides[safeSlideIndex];
 
   return (
-    <div className="auth-page-v4 min-h-svh w-full overflow-hidden px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-5 lg:px-8 lg:py-6">
+    <div className="auth-page-v4 min-h-svh w-full overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-5 lg:px-8 lg:py-6">
       <div className="auth-page-v4__glow auth-page-v4__glow--left" aria-hidden="true" />
       <div className="auth-page-v4__glow auth-page-v4__glow--right" aria-hidden="true" />
 
-      <div className="auth-shell-v4 mx-auto grid w-full max-w-[1240px] grid-cols-1 overflow-hidden rounded-[32px] lg:grid-cols-2">
+      <div className="auth-shell-v4 mx-auto grid w-full grid-cols-1 overflow-hidden rounded-[32px] lg:grid-cols-2">
         <section className="auth-shell-v4__visual min-w-0">
           <div className="auth-hero-v4">
             <div className="auth-hero-v4__topbar">
@@ -99,7 +99,7 @@ export function AuthShell({
         </section>
 
         <section className="auth-shell-v4__form min-w-0">
-          <div className="auth-form-v4 w-full max-w-[448px]">
+          <div className="auth-form-v4 w-full">
             <header className="auth-form-v4__header">
               <h1>{title}</h1>
               <div className="auth-form-v4__subtitle">{subtitle}</div>
