@@ -2809,15 +2809,15 @@ body {
 
 .auth-panel-fields-v4 {
   display: grid;
-  min-height: 0;
   align-content: start;
   gap: 1.05rem;
-  overflow-y: auto;
-  padding-right: 0.2rem;
 }
 
 .auth-panel-fields-v4--signup {
+  min-height: 0;
   gap: 0.95rem;
+  overflow-y: auto;
+  padding-right: 0.2rem;
 }
 
 .auth-field-row-v4 {

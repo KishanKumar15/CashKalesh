@@ -48,6 +48,11 @@ export function AuthShell({
   children: ReactNode;
   footer: ReactNode;
 }) {
+  const safeSlideIndex = Number.isFinite(activeSlide)
+    ? ((activeSlide % authShellSlides.length) + authShellSlides.length) % authShellSlides.length
+    : 0;
+  const currentSlide = authShellSlides[safeSlideIndex];
+
   return (
     <div className="auth-page-v4 min-h-svh w-full overflow-hidden px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-5 lg:px-8 lg:py-6">
       <div className="auth-page-v4__glow auth-page-v4__glow--left" aria-hidden="true" />
@@ -61,28 +66,22 @@ export function AuthShell({
             </div>
 
             <div className="auth-hero-v4__media relative overflow-hidden rounded-[22px]">
-              {authShellSlides.map((item, index) => (
-                <div
-                  key={item.title}
-                  className={index === activeSlide ? `auth-hero-v4__slide ${item.themeClass} is-active` : `auth-hero-v4__slide ${item.themeClass}`}
-                  aria-hidden={index !== activeSlide}
-                >
-                  <div className="auth-hero-v4__slideGlow auth-hero-v4__slideGlow--primary" />
-                  <div className="auth-hero-v4__slideGlow auth-hero-v4__slideGlow--secondary" />
-                  <div className="auth-hero-v4__slideArc auth-hero-v4__slideArc--back" />
-                  <div className="auth-hero-v4__slideArc auth-hero-v4__slideArc--front" />
-                  <div className="auth-hero-v4__copy">
-                    <p className="auth-hero-v4__eyebrow">{item.eyebrow}</p>
-                    <h2>{item.title}</h2>
-                    <p>{item.body}</p>
-                    <div className="auth-hero-v4__accents">
-                      {item.accents.map((accent) => (
-                        <span key={accent} className="auth-hero-v4__accentChip">{accent}</span>
-                      ))}
-                    </div>
+              <div className={`auth-hero-v4__slide ${currentSlide.themeClass} is-active`}>
+                <div className="auth-hero-v4__slideGlow auth-hero-v4__slideGlow--primary" />
+                <div className="auth-hero-v4__slideGlow auth-hero-v4__slideGlow--secondary" />
+                <div className="auth-hero-v4__slideArc auth-hero-v4__slideArc--back" />
+                <div className="auth-hero-v4__slideArc auth-hero-v4__slideArc--front" />
+                <div className="auth-hero-v4__copy">
+                  <p className="auth-hero-v4__eyebrow">{currentSlide.eyebrow}</p>
+                  <h2>{currentSlide.title}</h2>
+                  <p>{currentSlide.body}</p>
+                  <div className="auth-hero-v4__accents">
+                    {currentSlide.accents.map((accent) => (
+                      <span key={accent} className="auth-hero-v4__accentChip">{accent}</span>
+                    ))}
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
 
             <div className="auth-hero-v4__dots" aria-label="Auth story slides">
@@ -90,7 +89,7 @@ export function AuthShell({
                 <button
                   key={item.title}
                   type="button"
-                  className={index === activeSlide ? 'is-active' : ''}
+                  className={index === safeSlideIndex ? 'is-active' : ''}
                   aria-label={`Show slide ${index + 1}`}
                   onClick={() => onSlideChange(index)}
                 />
