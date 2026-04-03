@@ -112,11 +112,12 @@ builder.Services.AddHostedService<RecurringTransactionWorker>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty; // This makes Swagger the HOME page
+});
 
 app.UseSerilogRequestLogging();
 app.UseCors("frontend");
